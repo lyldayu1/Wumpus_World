@@ -19,11 +19,14 @@
 import java.util.*;
 public class MyAI extends Agent
 {
+	boolean isreturn;
+	int point=0;
 	Action lastAction;
-	HashSet<String> unvisited;
+	Stack<String> stack;
+	HashSet<String> visited;
 	HashSet<String> safe;
 	HashSet<String> uncertain;
-	HashMap<String,ArrayList<Integer>> map;
+	HashMap<String,String> map;
     boolean	goldLooted;		// True if gold was successfuly looted
 	boolean	hasArrow;		// True if the agent can shoot
 	boolean	bump;			// Bump percept flag
@@ -44,6 +47,15 @@ public class MyAI extends Agent
 		agentX       = 0;
 		agentY       = 0;
 		lastAction   = Action.CLIMB;
+		
+		isreturn=false;
+		stack=new Stack<String>();
+		visited=new HashSet<String>();
+		visited.add("00");
+		safe=new HashSet<String>();
+		safe.add("00");
+		uncertain=new HashSet<String>();
+		map=new HashMap<String,String>();
 		// ======================================================================
 		// YOUR CODE ENDS
 		// ======================================================================
@@ -62,10 +74,203 @@ public class MyAI extends Agent
 		// YOUR CODE BEGINS
 		// ======================================================================
 		
+		//put the current position<key,value>to map
+		String key=String.valueOf(agentX)+String.valueOf(agentY);
+		String cur_value= (stench==false?String.valueOf(0):String.valueOf(1))+(breeze==false?String.valueOf(0):String.valueOf(1))
+				+ (glitter==false?String.valueOf(0):String.valueOf(1))+ (bump==false?String.valueOf(0):String.valueOf(1))
+				+(scream==false?String.valueOf(0):String.valueOf(1));
+		map.put(key, cur_value);
+		if(agentX==0&&agentY==0) {
+			point++;
+			if(point>=2)
+				return Action.CLIMB;
+		}
+		if(isreturn) {     //when the gold is catched
+			if(agentX==0&&agentY==0)
+				return Action.CLIMB;
+			return return_action();
+		}
+		if(glitter) {
+			isreturn=true;
+			return Action.GRAB;
+		}
+		if((stench==false)&&(breeze==false)) {     //safe
+			safe.add(String.valueOf(agentX+1)+String.valueOf(agentY));
+			safe.add(String.valueOf(agentX)+String.valueOf(agentY+1));
+			safe.add(String.valueOf(agentX-1)+String.valueOf(agentY));
+			safe.add(String.valueOf(agentX)+String.valueOf(agentY-1));
+			if(!visited.contains(String.valueOf(agentX+1)+String.valueOf(agentY))){
+				return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
+			}else if(!visited.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
+				return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
+			}else if(!visited.contains(String.valueOf(agentX-1)+String.valueOf(agentY))) {
+				return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
+			}else if(!visited.contains(String.valueOf(agentX)+String.valueOf(agentY-1))) {
+				return forward_action(String.valueOf(agentX)+String.valueOf(agentY-1),key);
+			}else {
+				return return_action();
+			}
+		}
+		if(stench==true||breeze==true) {
+			//logic judge   ignore
+			if(!safe.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
+				uncertain.add(String.valueOf(agentX)+String.valueOf(agentY+1));
+			}
+			if(!safe.contains(String.valueOf(agentX)+String.valueOf(agentY-1))) {
+				uncertain.add(String.valueOf(agentX)+String.valueOf(agentY-1));
+			}
+			if(!safe.contains(String.valueOf(agentX-1)+String.valueOf(agentY))) {
+				uncertain.add(String.valueOf(agentX-1)+String.valueOf(agentY));
+			}
+			if(!safe.contains(String.valueOf(agentX+1)+String.valueOf(agentY))) {
+				uncertain.add(String.valueOf(agentX+1)+String.valueOf(agentY));
+			}
+			return  return_action();
+		}
+		if(bump) {
+			return return_action();
+		}
 		return Action.CLIMB;
+
 		// ======================================================================
 		// YOUR CODE ENDS
 		// ======================================================================
+	}
+	public Action return_action() {
+		if(stack.isEmpty())return Action.CLIMB;
+		String last_cur=stack.peek();
+		if((last_cur.charAt(0)-'0'-agentX)==-1) {
+			if(agentDir==0) {
+				agentDir=1;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==1) {
+				agentDir=2;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==2) {
+				stack.pop();
+				agentX--;
+				return Action.FORWARD;
+			}else {
+				agentDir=2;
+				return Action.TURN_LEFT;
+			}
+		}else if((last_cur.charAt(0)-'0'-agentX)==1) {
+			if(agentDir==0) {
+				stack.pop();
+				agentX++;
+				return Action.FORWARD;
+			}else if(agentDir==1) {
+				agentDir=0;
+				return Action.TURN_LEFT;
+			}else if(agentDir==2) {
+				agentDir=3;
+				return Action.TURN_RIGHT;
+			}else {
+				agentDir=0;
+				return Action.TURN_RIGHT;
+			}
+		}else if((last_cur.charAt(1)-'0'-agentY)==1) {
+			if(agentDir==0) {
+				agentDir=3;
+				return Action.TURN_LEFT;
+			}else if(agentDir==1) {
+				agentDir=2;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==2) {
+				agentDir=3;
+				return Action.TURN_RIGHT;
+			}else {
+				stack.pop();
+				agentY++;
+				return Action.FORWARD;
+			}
+		}else {
+			if(agentDir==0) {
+				agentDir=1;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==1) {
+				stack.pop();
+				agentY--;
+				return Action.FORWARD;
+			}else if(agentDir==2) {
+				agentDir=1;
+				return Action.TURN_LEFT;
+			}else {
+				agentDir=2;
+				return Action.TURN_LEFT;
+			}
+		}
+	}
+	public Action forward_action(String next_cur,String cur) {
+		if((next_cur.charAt(0)-'0'-agentX)==-1) {
+			if(agentDir==0) {
+				agentDir=1;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==1) {
+				agentDir=2;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==2) {
+				stack.push(cur);
+				agentX--;
+				visited.add(next_cur);
+				safe.add(next_cur);
+				return Action.FORWARD;
+			}else {
+				agentDir=2;
+				return Action.TURN_LEFT;
+			}
+		}else if((next_cur.charAt(0)-'0'-agentX)==1) {
+			if(agentDir==0) {
+				stack.push(cur);
+				agentX++;
+				visited.add(next_cur);
+				safe.add(next_cur);
+				return Action.FORWARD;
+			}else if(agentDir==1) {
+				agentDir=0;
+				return Action.TURN_LEFT;
+			}else if(agentDir==2) {
+				agentDir=3;
+				return Action.TURN_RIGHT;
+			}else {
+				agentDir=0;
+				return Action.TURN_RIGHT;
+			}
+		}else if((next_cur.charAt(1)-'0'-agentY)==1) {
+			if(agentDir==0) {
+				agentDir=3;
+				return Action.TURN_LEFT;
+			}else if(agentDir==1) {
+				agentDir=2;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==2) {
+				agentDir=3;
+				return Action.TURN_RIGHT;
+			}else {
+				stack.push(cur);
+				agentY++;
+				visited.add(next_cur);
+				safe.add(next_cur);
+				return Action.FORWARD;
+			}
+		}else {
+			if(agentDir==0) {
+				agentDir=1;
+				return Action.TURN_RIGHT;
+			}else if(agentDir==1) {
+				stack.push(cur);
+				agentY--;
+				visited.add(next_cur);
+				safe.add(next_cur);
+				return Action.FORWARD;
+			}else if(agentDir==2) {
+				agentDir=1;
+				return Action.TURN_LEFT;
+			}else {
+				agentDir=2;
+				return Action.TURN_LEFT;
+			}
+		}
 	}
 	
 	// ======================================================================
