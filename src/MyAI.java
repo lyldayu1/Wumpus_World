@@ -80,23 +80,27 @@ public class MyAI extends Agent
 				+ (glitter==false?String.valueOf(0):String.valueOf(1))+ (bump==false?String.valueOf(0):String.valueOf(1))
 				+(scream==false?String.valueOf(0):String.valueOf(1));
 		map.put(key, cur_value);
+		//back to init point. and if user back to point over 2 times, it will climb. 
 		if(agentX==0&&agentY==0) {
 			System.out.println("1");
 			point++;
 			if(point>=2)
 				return Action.CLIMB;
 		}
+		//climb when user back to init point after getting the gold
 		if(isreturn) {     //when the gold is catched
 			System.out.println("2");
 			if(agentX==0&&agentY==0)
 				return Action.CLIMB;
 			return return_action();
 		}
+		
 		if(glitter) {
 			System.out.println("3");
 			isreturn=true;
 			return Action.GRAB;
 		}
+		
 		if(bump) {
 			visited.add(key);
 			String last=stack.pop();
