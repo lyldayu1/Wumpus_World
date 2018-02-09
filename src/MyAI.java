@@ -81,20 +81,41 @@ public class MyAI extends Agent
 				+(scream==false?String.valueOf(0):String.valueOf(1));
 		map.put(key, cur_value);
 		if(agentX==0&&agentY==0) {
+			System.out.println("1");
 			point++;
 			if(point>=2)
 				return Action.CLIMB;
 		}
 		if(isreturn) {     //when the gold is catched
+			System.out.println("2");
 			if(agentX==0&&agentY==0)
 				return Action.CLIMB;
 			return return_action();
 		}
 		if(glitter) {
+			System.out.println("3");
 			isreturn=true;
 			return Action.GRAB;
 		}
+		if(bump) {
+			visited.add(key);
+			String last=stack.pop();
+			agentX=last.charAt(0)-'0';
+			agentY=last.charAt(1)-'0';
+			if(!visited.contains(String.valueOf(agentX+1)+String.valueOf(agentY))){
+				return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
+			}else if(!visited.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
+				return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
+			}else if(!visited.contains(String.valueOf(agentX-1)+String.valueOf(agentY))) {
+				return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
+			}else if(!visited.contains(String.valueOf(agentX)+String.valueOf(agentY-1))) {
+				return forward_action(String.valueOf(agentX)+String.valueOf(agentY-1),key);
+			}else {
+				return return_action();
+			}
+		}
 		if((stench==false)&&(breeze==false)) {     //safe
+			System.out.println("5");
 			safe.add(String.valueOf(agentX+1)+String.valueOf(agentY));
 			safe.add(String.valueOf(agentX)+String.valueOf(agentY+1));
 			safe.add(String.valueOf(agentX-1)+String.valueOf(agentY));
@@ -113,6 +134,7 @@ public class MyAI extends Agent
 		}
 		if(stench==true||breeze==true) {
 			//logic judge   ignore
+			System.out.println("6");
 			if(!safe.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
 				uncertain.add(String.valueOf(agentX)+String.valueOf(agentY+1));
 			}
@@ -126,11 +148,12 @@ public class MyAI extends Agent
 				uncertain.add(String.valueOf(agentX+1)+String.valueOf(agentY));
 			}
 			return  return_action();
-		}
-		if(bump) {
+		}else {
+			System.out.println("7");
 			return return_action();
 		}
-		return Action.CLIMB;
+		
+		
 
 		// ======================================================================
 		// YOUR CODE ENDS
