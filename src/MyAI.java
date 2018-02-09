@@ -82,21 +82,21 @@ public class MyAI extends Agent
 		map.put(key, cur_value);
 		//back to init point. and if user back to point over 2 times, it will climb. 
 		if(agentX==0&&agentY==0) {
-			System.out.println("1");
+			//System.out.println("1");
 			point++;
 			if(point>=2)
 				return Action.CLIMB;
 		}
 		//climb when user back to init point after getting the gold
 		if(isreturn) {     //when the gold is catched
-			System.out.println("2");
+			//System.out.println("2");
 			if(agentX==0&&agentY==0)
 				return Action.CLIMB;
 			return return_action();
 		}
 		
 		if(glitter) {
-			System.out.println("3");
+			//System.out.println("3");
 			isreturn=true;
 			return Action.GRAB;
 		}
@@ -119,7 +119,7 @@ public class MyAI extends Agent
 			}
 		}
 		if((stench==false)&&(breeze==false)) {     //safe
-			System.out.println("5");
+			//System.out.println("5");
 			safe.add(String.valueOf(agentX+1)+String.valueOf(agentY));
 			safe.add(String.valueOf(agentX)+String.valueOf(agentY+1));
 			safe.add(String.valueOf(agentX-1)+String.valueOf(agentY));
@@ -138,7 +138,7 @@ public class MyAI extends Agent
 		}
 		if(stench==true||breeze==true) {
 			//logic judge   ignore
-			System.out.println("6");
+			//System.out.println("6");
 			if(!safe.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
 				uncertain.add(String.valueOf(agentX)+String.valueOf(agentY+1));
 			}
@@ -153,7 +153,7 @@ public class MyAI extends Agent
 			}
 			return  return_action();
 		}else {
-			System.out.println("7");
+			//System.out.println("7");
 			return return_action();
 		}
 		
