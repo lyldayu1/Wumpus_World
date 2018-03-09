@@ -158,13 +158,13 @@ public class MyAI extends Agent
 		if(stench)
 			details = details + 1;
 		if(breeze)
-			details = details + 1 << 1;
+			details = details + (1 << 1);
 		if(glitter)
-			details = details + 1 << 2;
+			details = details + (1 << 2);
 		if(bump)
-			details = details + 1 << 3;
+			details = details + (1 << 3);
 		if(scream)
-			details = details + 1 << 4;
+			details = details + (1 << 4);
 		return details;
 	}
 	// ======================================================================
@@ -199,6 +199,10 @@ public class MyAI extends Agent
 		//back to init point. and if user back to point over 2 times, it will climb. 
 		if(agentX==0&&agentY==0) {
 			//System.out.println("1");
+			if(stench&&hasArrow) {
+				hasArrow=false;
+				return Action.SHOOT;
+			}
 			point++;
 			if(point>=4)
 				return Action.CLIMB;
@@ -219,10 +223,7 @@ public class MyAI extends Agent
 		
 		if(bump) {
 			
-			if(agentDir==0)
-				maxX=agentX;
-			if(agentDir==3)
-				maxY=agentY;
+			
 			
 			Clause clause=new Clause();
 			clause.add("-P"+key);
@@ -237,6 +238,10 @@ public class MyAI extends Agent
 			String last=stack.pop();
 			agentX=last.charAt(0)-'0';
 			agentY=last.charAt(1)-'0';
+			if(agentDir==0)
+				maxX=agentX;
+			if(agentDir==3)
+				maxY=agentY;
 			if(!visited.contains(String.valueOf(agentX+1)+String.valueOf(agentY))){
 				return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
 			}else if(!visited.contains(String.valueOf(agentX)+String.valueOf(agentY+1))) {
@@ -293,7 +298,7 @@ public class MyAI extends Agent
 		}
 		if(stench==true||breeze==true) {		
 			if(this.scream==true&&breeze==false) { //equal to safe node
-				System.out.println("1");
+				//System.out.println("1");
 				safe.add(Coord(agentX+1, agentY));
 				safe.add(Coord(agentX,agentY+1));
 				safe.add(Coord(agentX-1,agentY));
@@ -328,12 +333,12 @@ public class MyAI extends Agent
 					return return_action();
 				}
 			}else if((stench==false||this.scream==true)&&breeze==true) {
-				System.out.println("2");
+				//System.out.println("2");
 				if(safe.contains(Coord(agentX+1,agentY))&&(!visited.contains(Coord(agentX+1,agentY)))) {
-					return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
+					return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
 				}
 				if(safe.contains(Coord(agentX,agentY+1))&&(!visited.contains(Coord(agentX,agentY+1)))) {
-					return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
+					return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
 				}
 				if(safe.contains(Coord(agentX-1,agentY))&&(!visited.contains(Coord(agentX-1,agentY)))) {
 					return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
@@ -376,7 +381,7 @@ public class MyAI extends Agent
 						Pit_Clauses_copy1.add(clause);
 						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX+1,agentY));
 						if(isPit==false) {
-							safe.add(Coord(agentX+1,agentY));
+							//safe.add(Coord(agentX+1,agentY));
 							clause=new Clause();
 							clause.add("-P"+Coord(agentX+1,agentY));
 							Pit_Clauses.add(clause);
@@ -402,7 +407,7 @@ public class MyAI extends Agent
 						Pit_Clauses_copy1.add(clause);
 						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX,agentY+1));
 						if(isPit==false) {
-							safe.add(Coord(agentX,agentY+1));
+							//safe.add(Coord(agentX,agentY+1));
 							clause=new Clause();
 							clause.add("-P"+Coord(agentX,agentY+1));
 							Pit_Clauses.add(clause);
@@ -428,7 +433,7 @@ public class MyAI extends Agent
 						Pit_Clauses_copy1.add(clause);
 						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX-1, agentY));
 						if(isPit==false) {
-							safe.add(Coord(agentX-1, agentY));
+							//safe.add(Coord(agentX-1, agentY));
 							clause=new Clause();
 							clause.add("-P"+Coord(agentX-1, agentY));
 							Pit_Clauses.add(clause);
@@ -454,7 +459,7 @@ public class MyAI extends Agent
 						Pit_Clauses_copy1.add(clause);
 						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX, agentY-1));
 						if(isPit==false) {
-							safe.add(Coord(agentX, agentY-1));
+							//safe.add(Coord(agentX, agentY-1));
 							clause=new Clause();
 							clause.add("-P"+Coord(agentX, agentY-1));
 							Pit_Clauses.add(clause);
@@ -464,151 +469,7 @@ public class MyAI extends Agent
 				}
 				return return_action();
 			}else if(stench==true&&breeze==false){
-				System.out.println("3");
-				if(Coord(agentX+1,agentY)==wumposition) {
-					return shot_action(Coord(agentX+1,agentY),key);
-				}
-				if(Coord(agentX,agentY+1)==wumposition) {
-					return shot_action(Coord(agentX,agentY+1),key);
-				}
-				if(Coord(agentX-1,agentY)==wumposition) {
-					return shot_action(Coord(agentX-1,agentY),key);
-				}
-				if(Coord(agentX,agentY-1)==wumposition) {
-					return shot_action(Coord(agentX,agentY-1),key);
-				}
-				ArrayList<String> neighs=new ArrayList<String>();
-				if(Coord(agentX+1, agentY)!="e") {
-					neighs.add(Coord(agentX+1, agentY));
-				}
-				if(Coord(agentX,agentY+1)!="e") {
-					neighs.add(Coord(agentX,agentY+1));
-				}
-				if(Coord(agentX-1,agentY)!="e") {
-					neighs.add(Coord(agentX-1,agentY));
-				}
-				if(Coord(agentX,agentY-1)!="e") {
-					neighs.add(Coord(agentX,agentY-1));
-				}
-				addWumClause(key,neighs);
-				Clause clause=new Clause();
-				clause.add("S"+key);
-				Wum_Clauses.add(clause);
-				if(!safe.contains(Coord(agentX+1,agentY))) {
-					ArrayList<Clause> Wum_Clauses_copy=copy_list(Wum_Clauses);
-					clause=new Clause();
-					clause.add("-W"+Coord(agentX+1,agentY));
-					Wum_Clauses_copy.add(clause);
-					boolean isWum=Logic(Wum_Clauses_copy,"-W"+Coord(agentX+1,agentY));
-					if(isWum==false) {
-						certain_pit.add(Coord(agentX+1,agentY));
-						clause=new Clause();
-						clause.add("W"+Coord(agentX+1,agentY));
-					    Wum_Clauses.add(clause);
-					    wumposition=Coord(agentX+1,agentY);
-					    return shot_action(Coord(agentX+1,agentY),key);
-					}else {
-						ArrayList<Clause> Wum_Clauses_copy1=copy_list(Wum_Clauses);
-						clause=new Clause();
-						clause.add("W"+Coord(agentX+1,agentY));
-						Wum_Clauses_copy1.add(clause);
-						isWum=Logic(Wum_Clauses_copy1,"W"+Coord(agentX+1,agentY));
-						if(isWum==false) {
-							safe.add(Coord(agentX+1,agentY));
-							clause=new Clause();
-							clause.add("-W"+Coord(agentX+1,agentY));
-							Wum_Clauses.add(clause);
-							return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
-						}
-					}
-				}
-				if(!safe.contains(Coord(agentX,agentY+1))) {
-					ArrayList<Clause> Wum_Clauses_copy=copy_list(Wum_Clauses);
-					clause=new Clause();
-					clause.add("-W"+Coord(agentX,agentY+1));
-					Wum_Clauses_copy.add(clause);
-					boolean isWum=Logic(Wum_Clauses_copy,"-W"+Coord(agentX,agentY+1));
-					if(isWum==false) {
-						certain_pit.add(Coord(agentX,agentY+1));
-						clause=new Clause();
-						clause.add("W"+Coord(agentX,agentY+1));
-					    Wum_Clauses.add(clause);
-					    wumposition=Coord(agentX,agentY+1);
-					    return shot_action(Coord(agentX,agentY+1),key);
-					}else {
-						ArrayList<Clause> Wum_Clauses_copy1=copy_list(Wum_Clauses);
-						clause=new Clause();
-						clause.add("W"+Coord(agentX,agentY+1));
-						Wum_Clauses_copy1.add(clause);
-						isWum=Logic(Wum_Clauses_copy1,"W"+Coord(agentX,agentY+1));
-						if(isWum==false) {
-							safe.add(Coord(agentX,agentY+1));
-							clause=new Clause();
-							clause.add("-W"+Coord(agentX,agentY+1));
-							Wum_Clauses.add(clause);
-							return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
-						}
-					}
-				}
-				if(!safe.contains(Coord(agentX-1,agentY))) {
-					ArrayList<Clause> Wum_Clauses_copy=copy_list(Wum_Clauses);
-					clause=new Clause();
-					clause.add("-W"+Coord(agentX-1,agentY));
-					Wum_Clauses_copy.add(clause);
-					boolean isWum=Logic(Wum_Clauses_copy,"-W"+Coord(agentX-1,agentY));
-					if(isWum==false) {
-						certain_pit.add(Coord(agentX-1,agentY));
-						clause=new Clause();
-						clause.add("W"+Coord(agentX-1,agentY));
-					    Wum_Clauses.add(clause);
-					    wumposition=Coord(agentX-1,agentY);
-					    return shot_action(Coord(agentX-1,agentY),key);
-					}else {
-						ArrayList<Clause> Wum_Clauses_copy1=copy_list(Wum_Clauses);
-						clause=new Clause();
-						clause.add("W"+Coord(agentX-1,agentY));
-						Wum_Clauses_copy1.add(clause);
-						isWum=Logic(Wum_Clauses_copy1,"W"+Coord(agentX-1,agentY));
-						if(isWum==false) {
-							safe.add(Coord(agentX-1,agentY));
-							clause=new Clause();
-							clause.add("-W"+Coord(agentX-1,agentY));
-							Wum_Clauses.add(clause);
-							return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
-						}
-					}
-				}
-				if(!safe.contains(Coord(agentX,agentY-1))) {
-					ArrayList<Clause> Wum_Clauses_copy=copy_list(Wum_Clauses);
-					clause=new Clause();
-					clause.add("-W"+Coord(agentX,agentY-1));
-					Wum_Clauses_copy.add(clause);
-					boolean isWum=Logic(Wum_Clauses_copy,"-W"+Coord(agentX,agentY-1));
-					if(isWum==false) {
-						certain_pit.add(Coord(agentX,agentY-1));
-						clause=new Clause();
-						clause.add("W"+Coord(agentX,agentY-1));
-					    Wum_Clauses.add(clause);
-					    wumposition=Coord(agentX,agentY-1);
-					    return shot_action(Coord(agentX,agentY-1),key);
-					}else {
-						ArrayList<Clause> Wum_Clauses_copy1=copy_list(Wum_Clauses);
-						clause=new Clause();
-						clause.add("W"+Coord(agentX,agentY-1));
-						Wum_Clauses_copy1.add(clause);
-						isWum=Logic(Wum_Clauses_copy1,"W"+Coord(agentX,agentY-1));
-						if(isWum==false) {
-							safe.add(Coord(agentX,agentY-1));
-							clause=new Clause();
-							clause.add("-W"+Coord(agentX,agentY-1));
-							Wum_Clauses.add(clause);
-							return forward_action(String.valueOf(agentX)+String.valueOf(agentY-1),key);
-						}
-					}
-				}
-				return return_action();
-			}else {
-				System.out.println("4");
+				//System.out.println("3");
 				ArrayList<String> neighs=new ArrayList<String>();
 				if(Coord(agentX+1, agentY)!="e") {
 					neighs.add(Coord(agentX+1, agentY));
@@ -623,55 +484,196 @@ public class MyAI extends Agent
 					neighs.add(Coord(agentX,agentY-1));
 				}
 				addPitClause(key,neighs);
-				addWumClause(key,neighs);
-				if(stench==true) {
-					Clause clause=new Clause();
-					clause.add("P"+key);
-					Pit_Clauses.add(clause);
-				}else {
-					Clause clause=new Clause();
-					clause.add("-P"+key);
-					Pit_Clauses.add(clause);
+				Clause clause=new Clause();
+				clause.add("-B"+key);
+				Pit_Clauses.add(clause);
+				if(Coord(agentX+1,agentY)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX+1,agentY),key);
 				}
-				if(breeze==true) {
-					Clause clause=new Clause();
-					clause.add("S"+key);
-					Wum_Clauses.add(clause);
-				}else {
-					Clause clause=new Clause();
-					clause.add("-S"+key);
-					Wum_Clauses.add(clause);
+				if(Coord(agentX,agentY+1)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX,agentY+1),key);
 				}
-				if(!safe.contains(Coord(agentX,agentY+1))) {
+				if(Coord(agentX-1,agentY)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX-1,agentY),key);
+				}
+				if(Coord(agentX,agentY-1)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX,agentY-1),key);
+				}
+				wumposition=WumpusMurder(agentX,agentY);
+				if(wumposition!="") {
+					//System.out.println(wumposition);
+					if(hasArrow!=false)
+					return shot_action(wumposition,key);
+				}
+				//call little brother's code
+				return return_action();
+			}else {
+				//System.out.println("4");
+				if(Coord(agentX+1,agentY)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX+1,agentY),key);
+				}
+				if(Coord(agentX,agentY+1)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX,agentY+1),key);
+				}
+				if(Coord(agentX-1,agentY)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX-1,agentY),key);
+				}
+				if(Coord(agentX,agentY-1)==wumposition) {
+					if(hasArrow!=false)
+					return shot_action(Coord(agentX,agentY-1),key);
+				}
+				wumposition=WumpusMurder(agentX,agentY); //what if we dont shoot.if we find the wumpus location. set a location dont go. shoot is -10
+				
+				if(wumposition!="") {
+					//System.out.println(wumposition);
+					if(hasArrow!=false)
+					return shot_action(wumposition,key);
+				}
+				if(safe.contains(Coord(agentX+1,agentY))&&(!visited.contains(Coord(agentX+1,agentY)))) {
+					return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
+				}
+				if(safe.contains(Coord(agentX,agentY+1))&&(!visited.contains(Coord(agentX,agentY+1)))) {
+					return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
+				}
+				if(safe.contains(Coord(agentX-1,agentY))&&(!visited.contains(Coord(agentX-1,agentY)))) {
+					return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
+				}
+				if(safe.contains(Coord(agentX,agentY-1))&&(!visited.contains(Coord(agentX,agentY-1)))) {
+					return forward_action(String.valueOf(agentX)+String.valueOf(agentY-1),key);
+				}
+				ArrayList<String> neighs=new ArrayList<String>();
+				if(Coord(agentX+1, agentY)!="e") {
+					neighs.add(Coord(agentX+1, agentY));
+				}
+				if(Coord(agentX,agentY+1)!="e") {
+					neighs.add(Coord(agentX,agentY+1));
+				}
+				if(Coord(agentX-1,agentY)!="e") {
+					neighs.add(Coord(agentX-1,agentY));
+				}
+				if(Coord(agentX,agentY-1)!="e") {
+					neighs.add(Coord(agentX,agentY-1));
+				}
+				addPitClause(key,neighs);
+				Clause clause=new Clause();
+				clause.add("B"+key);
+				Pit_Clauses.add(clause);
+				if((!safe.contains(Coord(agentX+1,agentY)))&&(!certain_pit.contains(Coord(agentX+1,agentY)))) {
 					ArrayList<Clause> Pit_Clauses_copy=copy_list(Pit_Clauses);
-					ArrayList<Clause> Wum_Clauses_copy=copy_list(Wum_Clauses);
-					if(breeze==true&&stench==true) {
-						Clause clause=new Clause();
-						clause.add("-P"+Coord(agentX,agentY+1));
-						Pit_Clauses_copy.add(clause);
-						boolean isPit=Logic(Pit_Clauses_copy,"-P"+Coord(agentX,agentY+1));
-						
+					clause=new Clause();
+					clause.add("-P"+Coord(agentX+1,agentY));
+					Pit_Clauses_copy.add(clause);
+					boolean isPit=Logic(Pit_Clauses_copy,"-P"+Coord(agentX+1,agentY));
+					if(isPit==false) {
+						certain_pit.add(Coord(agentX+1,agentY));
 						clause=new Clause();
-						clause.add("-W"+Coord(agentX,agentY+1));
-						Wum_Clauses_copy.add(clause);
-						boolean isWum=Logic(Wum_Clauses_copy,"-W"+Coord(agentX,agentY+1));
-						
+						clause.add("P"+Coord(agentX+1,agentY));
+						Pit_Clauses.add(clause);
+					}else {
+						ArrayList<Clause> Pit_Clauses_copy1=copy_list(Pit_Clauses);
+						clause=new Clause();
+						clause.add("P"+Coord(agentX+1,agentY));
+						Pit_Clauses_copy1.add(clause);
+						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX+1,agentY));
+						if(isPit==false) {
+							//safe.add(Coord(agentX+1,agentY));
+							clause=new Clause();
+							clause.add("-P"+Coord(agentX+1,agentY));
+							Pit_Clauses.add(clause);
+							return forward_action(String.valueOf(agentX+1)+String.valueOf(agentY),key);
+						}
 					}
-					uncertain.add(Coord(agentX,agentY+1));
 				}
-				if(!safe.contains(Coord(agentX,agentY-1))) {
-					uncertain.add(Coord(agentX,agentY-1));
+				if((!safe.contains(Coord(agentX,agentY+1)))&&(!certain_pit.contains(Coord(agentX,agentY+1)))) {
+					ArrayList<Clause> Pit_Clauses_copy=copy_list(Pit_Clauses);
+					clause=new Clause();
+					clause.add("-P"+Coord(agentX,agentY+1));
+					Pit_Clauses_copy.add(clause);
+					boolean isPit=Logic(Pit_Clauses_copy,"-P"+Coord(agentX,agentY+1));
+					if(isPit==false) {
+						certain_pit.add(Coord(agentX,agentY+1));
+						clause=new Clause();
+						clause.add("P"+Coord(agentX,agentY+1));
+						Pit_Clauses.add(clause);
+					}else {
+						ArrayList<Clause> Pit_Clauses_copy1=copy_list(Pit_Clauses);
+						clause=new Clause();
+						clause.add("P"+Coord(agentX,agentY+1));
+						Pit_Clauses_copy1.add(clause);
+						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX,agentY+1));
+						if(isPit==false) {
+							//safe.add(Coord(agentX,agentY+1));
+							clause=new Clause();
+							clause.add("-P"+Coord(agentX,agentY+1));
+							Pit_Clauses.add(clause);
+							return forward_action(String.valueOf(agentX)+String.valueOf(agentY+1),key);
+						}
+					}
 				}
-				if(!safe.contains(Coord(agentX-1, agentY))) {
-					uncertain.add(Coord(agentX-1, agentY));
+				if((!safe.contains(Coord(agentX-1, agentY)))&&(!certain_pit.contains(Coord(agentX-1, agentY)))) {
+					ArrayList<Clause> Pit_Clauses_copy=copy_list(Pit_Clauses);
+					clause=new Clause();
+					clause.add("-P"+Coord(agentX-1, agentY));
+					Pit_Clauses_copy.add(clause);
+					boolean isPit=Logic(Pit_Clauses_copy,"-P"+Coord(agentX-1, agentY));
+					if(isPit==false) {
+						certain_pit.add(Coord(agentX-1, agentY));
+						clause=new Clause();
+						clause.add("P"+Coord(agentX-1, agentY));
+						Pit_Clauses.add(clause);
+					}else {
+						ArrayList<Clause> Pit_Clauses_copy1=copy_list(Pit_Clauses);
+						clause=new Clause();
+						clause.add("P"+Coord(agentX-1, agentY));
+						Pit_Clauses_copy1.add(clause);
+						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX-1, agentY));
+						if(isPit==false) {
+							//safe.add(Coord(agentX-1, agentY));
+							clause=new Clause();
+							clause.add("-P"+Coord(agentX-1, agentY));
+							Pit_Clauses.add(clause);
+							return forward_action(String.valueOf(agentX-1)+String.valueOf(agentY),key);
+						}
+					}
 				}
-				if(!safe.contains(Coord(agentX+1, agentY))) {
-					uncertain.add(Coord(agentX+1, agentY));
+				if((!safe.contains(Coord(agentX, agentY-1)))&&(!certain_pit.contains(Coord(agentX, agentY-1)))) {
+					ArrayList<Clause> Pit_Clauses_copy=copy_list(Pit_Clauses);
+					clause=new Clause();
+					clause.add("-P"+Coord(agentX, agentY-1));
+					Pit_Clauses_copy.add(clause);
+					boolean isPit=Logic(Pit_Clauses_copy,"-P"+Coord(agentX, agentY-1));
+					if(isPit==false) {
+						certain_pit.add(Coord(agentX, agentY-1));
+						clause=new Clause();
+						clause.add("P"+Coord(agentX, agentY-1));
+						Pit_Clauses.add(clause);
+					}else {
+						ArrayList<Clause> Pit_Clauses_copy1=copy_list(Pit_Clauses);
+						clause=new Clause();
+						clause.add("P"+Coord(agentX, agentY-1));
+						Pit_Clauses_copy1.add(clause);
+						isPit=Logic(Pit_Clauses_copy1,"P"+Coord(agentX, agentY-1));
+						if(isPit==false) {
+							//safe.add(Coord(agentX, agentY-1));
+							clause=new Clause();
+							clause.add("-P"+Coord(agentX, agentY-1));
+							Pit_Clauses.add(clause);
+							return forward_action(String.valueOf(agentX)+String.valueOf(agentY-1),key);
+						}
+					}
 				}
+				
 				return  return_action();
 			}
 		}else {
-			System.out.println("5");
+			//System.out.println("5");
 			return return_action();
 		}
 		// ======================================================================
@@ -679,7 +681,8 @@ public class MyAI extends Agent
 		// ======================================================================
 	}
 	public Action return_action() {
-		if(stack.isEmpty())return Action.CLIMB;
+		if(stack.isEmpty())
+			return Action.CLIMB;
 		String last_cur=stack.peek();
 		if((last_cur.charAt(0)-'0'-agentX)==-1) {
 			if(agentDir==0) {
@@ -1039,6 +1042,135 @@ public class MyAI extends Agent
 			}
 		}
 		return false;
+	}
+	public String WumpusMurder
+	(int x, int y) 
+	{
+		ArrayList<String> Ws = new ArrayList<String>();
+		boolean s1=false,s2=false,s3=false,s4=false,s5=false,s6=false,s7=false,s8=false;
+		for(int i = 0; i < 2; i++)
+		{
+			String foo = Coord((x-1)+i*2,y);
+			String bar = Coord(x, (y-1)+i*2);
+			if( (foo != "e") && !safe.contains(foo) )
+				Ws.add(foo);
+			if( (bar != "e") && !safe.contains(bar) )
+				Ws.add(bar);
+		}
+		
+		for(int i = 0; i < Ws.size(); i++)
+		{
+			String temp = Ws.get(i);
+			int Wx=temp.charAt(0)-'0';
+			int Wy=temp.charAt(1)-'0';
+			if(Wx < x) 
+			{
+				String S1 = Coord(Wx-1 , Wy);
+				int S1V = KB.containsKey(S1)? KB.get(S1):0;
+				String S2 = Coord(Wx , Wy+1);
+				int S2V = KB.containsKey(S2)? KB.get(S2):0;
+				String S8 = Coord(Wx , Wy-1);
+				int S8V = KB.containsKey(S8)? KB.get(S8):0;				
+				
+				if( ((S1V & 1) == 1) || ( ((S2V & 1) == 1) && ((S8V & 1) == 1) ) )
+					return Ws.get(i);	
+				else if ((S2V & 1) == 1)
+					s2 = true;
+				else if ((S8V & 1) == 1)
+					s8 = true;
+			}
+			if(Wx > x) 
+			{
+				String S5 = Coord(Wx+1 , Wy);
+				int S5V = KB.containsKey(S5)? KB.get(S5):0;
+				String S4 = Coord(Wx , Wy+1);
+				int S4V = KB.containsKey(S4)? KB.get(S4):0;
+				String S6 = Coord(Wx , Wy-1);
+				int S6V = KB.containsKey(S6)? KB.get(S6):0;				
+				
+				if( ((S5V & 1) == 1) || ( ((S4V & 1) == 1) && ((S6V & 1) == 1) ) )
+					return Ws.get(i);	
+				else if ((S4V & 1) == 1)
+					s4 = true;
+				else if ((S6V & 1) == 1)
+					s6 = true;
+			}
+			if(Wy < y) 
+			{
+				String S7 = Coord(Wx , Wy-1);
+				int S7V = KB.containsKey(S7)? KB.get(S7):0;
+				String S8 = Coord(Wx-1 , Wy);
+				int S8V = KB.containsKey(S8)? KB.get(S8):0;
+				String S6 = Coord(Wx+1 , Wy);
+				int S6V = KB.containsKey(S6)? KB.get(S6):0;				
+				
+				if( ((S7V & 1) == 1) || ( ((S6V & 1) == 1) && ((S8V & 1) == 1) ) )
+					return Ws.get(i);
+				else if ((S6V & 1) == 1)
+					s6 = true;
+				else if ((S8V & 1) == 1)
+					s8 = true;
+			}
+			if(Wy > y) 
+			{
+				String S3 = Coord(Wx , Wy+1);
+				int S3V = KB.containsKey(S3)? KB.get(S3):0;
+				String S2 = Coord(Wx-1 , Wy);
+				int S2V = KB.containsKey(S2)? KB.get(S2):0;
+				String S4 = Coord(Wx+1 , Wy);
+				int S4V = KB.containsKey(S4)? KB.get(S4):0;				
+				
+				if( ((S3V & 1) == 1) || ( ((S2V & 1) == 1) && ((S4V & 1) == 1) ) )
+					return Ws.get(i);		
+				else if ((S2V & 1) == 1)
+					s2 = true;
+				else if ((S4V & 1) == 1)
+					s4 = true;
+			}
+			if(s6 )
+			{
+				String a="";
+				if(safe.contains(Coord(x,y-1)))
+					a =  Coord(x+1,y);
+				if(safe.contains(Coord(x+1,y)))
+					a =  Coord(x,y-1);
+				if(a != "e")
+					return a;
+			}
+			if(s8 )
+			{
+				String a="";
+				if(safe.contains(Coord(x-1,y)))
+					a =  Coord(x,y-1);
+				if(safe.contains(Coord(x,y-1)))
+					a =  Coord(x-1,y);
+				if(a != "e")
+					return a;
+			}
+			if(s2 )
+			{
+				String a="";
+				if(safe.contains(Coord(x-1,y)))
+					a =  Coord(x,y+1);
+				if(safe.contains(Coord(x,y+1)))
+					a =  Coord(x-1,y);
+				if(a != "e")
+					return a;
+			}
+			if(s4 )
+			{
+				String a="";
+				if(safe.contains(Coord(x,y+1)))
+					a =  Coord(x+1,y);
+				if(safe.contains(Coord(x+1,y)))
+					a =  Coord(x,y+1);
+				if(a != "e")
+					return a;
+			}
+
+		}
+		return "";
+	
 	}
 
 
