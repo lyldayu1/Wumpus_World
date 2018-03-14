@@ -53,6 +53,7 @@ public class MyAI extends Agent
 	int		agentY;			// The row where the agent is located ( y-coord = row-coord )
 	int     maxX;
 	int     maxY;
+	int     isup;
 	// ======================================================================
 	// My precious code below
 	HashMap<String, Integer> KB;
@@ -75,6 +76,7 @@ public class MyAI extends Agent
 		maxX         =0;
 		maxY         =0;
 		
+		isup=4;
 		isreturn=false;
 		stack=new Stack<String>();
 		visited=new HashSet<String>();
@@ -203,8 +205,14 @@ public class MyAI extends Agent
 				hasArrow=false;
 				return Action.SHOOT;
 			}
+			if(stench&&!hasArrow) {
+				this.scream=true;
+				visited.add("01");
+				wumposition="01";
+				isup=2;
+			}
 			point++;
-			if(point>=4)
+			if(point>=isup)
 				return Action.CLIMB;
 		}
 		//climb when user back to init point after getting the gold
@@ -222,9 +230,6 @@ public class MyAI extends Agent
 		}
 		
 		if(bump) {
-			
-			
-			
 			Clause clause=new Clause();
 			clause.add("-P"+key);
 			Pit_Clauses.add(clause);
